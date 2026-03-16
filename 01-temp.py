@@ -48,6 +48,7 @@ def convert(temperature: str, direction: str, history: list) -> tuple:
 with gr.Blocks(
     title="🌡️ Temperature Converter", theme=gr.themes.Monochrome(font="sans-serif")
 ) as demo:
+    gr.Markdown("# 🌡️ Temperature Converter")
     with gr.Row():
         with gr.Column(scale=2):
             temperature_input = gr.Textbox(
