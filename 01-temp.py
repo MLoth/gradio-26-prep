@@ -5,7 +5,10 @@ def convert(temperature: str, direction: str, history: list) -> tuple:
     if temperature.strip() == "":
         return (
             "",
-            gr.update(value="⚠️ Please enter a temperature value.", visible=True),
+            gr.update(
+                value="<p class='error'>Please enter a temperature value.</p>",
+                visible=True,
+            ),
         )
 
     try:
@@ -13,7 +16,10 @@ def convert(temperature: str, direction: str, history: list) -> tuple:
     except ValueError:
         return (
             "",
-            gr.update(value=f"⚠️ '{temperature}' is not a valid number.", visible=True),
+            gr.update(
+                value=f"<p class='error'>'{temperature}' is not a valid number.</p>",
+                visible=True,
+            ),
         )
 
     # Sanity-check: absolute zero is the hard physical lower bound
@@ -21,7 +27,7 @@ def convert(temperature: str, direction: str, history: list) -> tuple:
         return (
             "",
             gr.update(
-                value="⚠️ Temperature below absolute zero (−273.15 °C) is impossible.",
+                value="<p class='error'>Temperature below absolute zero (−273.15 °C) is impossible.</p>",
                 visible=True,
             ),
         )
@@ -29,18 +35,17 @@ def convert(temperature: str, direction: str, history: list) -> tuple:
         return (
             "",
             gr.update(
-                value="⚠️ Temperature below absolute zero (−459.67 °F) is impossible.",
+                value="<p class='error'>Temperature below absolute zero (−459.67 °F) is impossible.</p>",
                 visible=True,
             ),
         )
 
-    # ── Conversion ────────────────────────────────────────────────────────────
     if direction == "Celsius → Fahrenheit":
         result = (value * 9 / 5) + 32
-        result_text = f"{value:.2f} °C  =  {result:.2f} °F"
+        result_text = f"<p class='output-result'>{result:.2f}°F</p><p class='output-origin'>{value:.2f}°C</p>"
     else:
         result = (value - 32) * 5 / 9
-        result_text = f"{value:.2f} °F  =  {result:.2f} °C"
+        result_text = f"<p class='output-result'>{result:.2f}°C</p><p class='output-origin'>{value:.2f}°F</p>"
 
     return result_text, gr.update(value="", visible=False)
 
@@ -50,7 +55,7 @@ with gr.Blocks(
 ) as demo:
     gr.Markdown("# 🌡️ Temperature Converter")
     with gr.Row():
-        with gr.Column(scale=2):
+        with gr.Column():
             temperature_input = gr.Textbox(
                 label="Temperature",
                 placeholder="e.g. 100  or  -40.5",
@@ -61,35 +66,44 @@ with gr.Blocks(
                 value="Celsius → Fahrenheit",
                 label="Conversion direction",
             )
-            with gr.Row():
-                convert_btn = gr.Button(
-                    "Convert",
-                    variant="primary",
-                )
+            # with gr.Row():
+            # convert_btn = gr.Button(
+            #     "Convert",
+            #     variant="primary",
+            # )
 
-            error_output = gr.Textbox(
-                label="",
-                interactive=False,
-                show_label=False,
-                visible=False,
-                lines=1,
-            )
-
-        with gr.Column(scale=1):
-            result_output = gr.Textbox(
-                label="Result",
-                interactive=False,
-                lines=2,
-            )
+        with gr.Column():
+            result_output = gr.HTML()
+            error_output = gr.HTML()
 
     convert_inputs = [temperature_input, direction_input]
     convert_outputs = [result_output, error_output]
 
     callback = (convert, convert_inputs, convert_outputs)
 
-    convert_btn.click(*callback)
+    direction_input.change(*callback)
+    temperature_input.input(*callback)
+    temperature_input.change(*callback)
 
-    # Also trigger on Enter key inside the textbox
-    temperature_input.submit(*callback)
-
-demo.launch()
+demo.launch(
+    css="""
+.output-origin {
+  font-size: 2rem;
+  color: #ccc;
+  font-weight: 800;
+}
+.output-result {
+  font-size: 7rem;
+  font-weight: 900;
+  line-height: 1;
+}
+.error {
+  background: #ce0000;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 3rem;
+  color: white;
+}
+"""
+)
