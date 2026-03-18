@@ -1,6 +1,7 @@
 import gradio as gr
 import httpx
 import pandas as pd
+from gradio.themes.utils.sizes import radius_xxl
 
 BASE_URL = "http://127.0.0.1:8000"
 
@@ -28,9 +29,6 @@ def post(path: str, body: dict) -> dict | None:
     except Exception as e:
         print(f"API error: {e}")
         return None
-
-
-# ── Data loaders ──────────────────────────────────────────────────────────────
 
 
 def load_species(conservation_status: str) -> pd.DataFrame:
@@ -269,7 +267,7 @@ def create_spotting(
 # ── UI ────────────────────────────────────────────────────────────────────────
 
 with gr.Blocks(
-    title="🐦 Birds Viewer", theme=gr.themes.Soft(primary_hue="blue")
+    title="🐦 Birds Viewer",
 ) as demo:
     gr.Markdown("# 🐦 Birds Viewer")
     gr.Markdown("## Live data from the Birds API at `http://127.0.0.1:8000`.")
@@ -306,8 +304,13 @@ with gr.Blocks(
                         choices=["LC", "NT", "VU", "EN", "CR", "EW", "EX"],
                         label="Conservation status",
                     )
+                    # From colibri to albatros
                     sp_wingspan = gr.Slider(
-                        label="Wingspan (cm)", minimum=0, maximum=300, step=5, value=50
+                        label="Wingspan (cm)",
+                        minimum=5,
+                        maximum=350,
+                        step=5,
+                        value=50,
                     )
                 sp_submit_btn = gr.Button("Create species", variant="primary")
                 sp_feedback = gr.Textbox(
@@ -432,4 +435,8 @@ with gr.Blocks(
             )
 
 
-demo.launch()
+demo.launch(
+    theme=gr.themes.Monochrome(
+        primary_hue="blue", radius_size=radius_xxl, font="sans-serif"
+    )
+)

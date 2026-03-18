@@ -1,3 +1,6 @@
+# https://pastebin.com/8nguBWE6
+
+
 import gradio as gr
 
 
@@ -82,8 +85,8 @@ with gr.Blocks(
     callback = (convert, convert_inputs, convert_outputs)
 
     direction_input.change(*callback)
-    temperature_input.input(*callback)
-    temperature_input.change(*callback)
+    temperature_input.input(*callback)  # everytime a key changes
+    temperature_input.change(*callback)  # every the input changes
 
 demo.launch(
     css="""
